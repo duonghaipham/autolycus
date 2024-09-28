@@ -32,3 +32,21 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            export CR_PAT=${{ secrets.GHCR_PAT }}
+            docker login ghcr.io -u ${{ github.actor }} -p $CR_PAT
+            cd /usr/local/src/atlas
+            docker compose down autolycus
+            docker pull ghcr.io/${{ github.repository }}:latest
+            docker compose up -d autolycus
