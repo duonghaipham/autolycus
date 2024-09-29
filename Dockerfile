@@ -1,6 +1,6 @@
 # Install dependencies
 
-FROM node:20-alpine as deps
+FROM node:20-alpine AS deps
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ RUN yarn install --frozen-lockfile
 
 # Rebuild the source code only when needed
 
-FROM node:20-alpine as builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ RUN yarn build && yarn install --production --ignore-scripts --prefer-offline &&
 
 # Release
 
-FROM node:20-alpine as runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
@@ -35,7 +35,5 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
 USER appuser
-
-EXPOSE 3000
 
 CMD ["yarn", "start"]
